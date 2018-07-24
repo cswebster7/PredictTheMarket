@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import * as d3 from './d3v4.js';
+import { Button } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 class Dragchart extends Component {
   componentDidMount() {
@@ -37,7 +39,7 @@ class Dragchart extends Component {
 
     let ƒ = d3.f;
 
-    let sel = d3.select('body').html('');
+    let sel = d3.select('#drag').html('');
     let c = d3.conventions({
       parentSel: sel,
       totalWidth: sel.node().offsetWidth,
@@ -88,7 +90,7 @@ class Dragchart extends Component {
 
     correctSelr.append('path.arear').at({ d: arear(datar)});
     correctSelr.append('path.liner').at({ d: liner(datar)});
-    
+
     let yourDataSel = c.svg.append('path.your-line');
     c.drawAxis();
 
@@ -133,7 +135,14 @@ class Dragchart extends Component {
   }
 
   render() {
-    return <div ref="drag" />;
+  return (
+      <div className="mainWidget">
+        <p>Predict the Market</p>
+        <Button bsStyle='primary' className='submit-prediction'>Submit Prediction</Button>
+        <Button bsStyle='primary' className='see-average'>See Average</Button>
+        <div id="drag"></div>
+      </div>
+    );
   }
 }
 

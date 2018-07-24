@@ -4,13 +4,16 @@ body {
   font-family: sans-serif;
 }
 svg{
-	overflow: visible;
+  overflow: visible;
+  background-color: white;
 }
 
 body{
   font-family: monospace;
-  margin: 0px;
+  margin: 40px !important;
+  margin-top: 150px !important;
   overflow: hidden;
+  background-color: #235b98 !important;
 }
 
 .axis{
@@ -41,4 +44,26 @@ body{
   stroke: #f0f;
   stroke-width: 3;
   stroke-dasharray: 5 5;
+}
+
+p {
+  color: white;
+  text-align: center;
+  font-family: sans-serif;
+  font-weight: normal;
+  font-size: 100px;
+}
+
+.submit-prediction {
+  position: absolute;
+  top: 350px;
+  left: 30%;
+  width: 200px;
+}
+
+.see-average {
+  position: absolute;
+  top: 400px;
+  left: 30%;
+  width: 200px;
 }
