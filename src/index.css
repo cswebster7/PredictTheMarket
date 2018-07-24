@@ -19,12 +19,22 @@ body{
 
 .line{
   fill: none;
-  stroke: black;
+  stroke: #93c55f;
   stroke-width: 3;
 }
 
 .area{
-  fill: #eee;
+  fill: #e2f1d4;
+}
+
+.arear{
+  fill: #daeeff;
+}
+
+.liner{
+  fill: none;
+  stroke: #70baff;
+  stroke-width: 3;
 }
 
 .your-line{
