@@ -11,6 +11,7 @@ class Dragchart extends Component {
       debutData: {},
       showErrorModal: false,
       averageData: [],
+      showButtonFlag: false,
     };
   }
 
@@ -40,9 +41,9 @@ class Dragchart extends Component {
     })
       .then(res => {
         let averageData = JSON.parse(res.data);
-        this.setState({ averageData: averageData.averages }, () => {
+        this.setState({ averageData: averageData.averages, showButtonFlag: true }, () => {
           let { averageData } = this.state;
-          console.log(averageData);
+
           let ƒ = d3.f;
 
           let sel = d3.select('#drag').html('');
@@ -170,7 +171,6 @@ class Dragchart extends Component {
 
   onSubmit = () => {
     if (this.state.debutData)
-    console.log(this.state.debutData);
     if (Object.keys(this.state.debutData).length > 0) {
       this.saveDebutValue(this.state.debutData);
     } else {
@@ -191,7 +191,6 @@ class Dragchart extends Component {
         debt: averages[key]
       })
     });
-    console.log(avrgs);
     this.setState({averageData: avrgs});
   }
   deleteDb = () => {
@@ -208,11 +207,15 @@ class Dragchart extends Component {
               <Button bsStyle='danger' className="error-message" onClick={this.handleDismiss}>Close</Button>
             </Alert>
           )}
-          <p>Predict the Market</p>
-          <Button bsStyle='primary' className='submit-prediction' onClick={this.onSubmit}>Submit Prediction</Button>
-          <Button bsStyle='primary' className='see-average' onClick={this.getAverage}>See Average</Button>
-          <Button bsStyle='danger' className='clear-db' onClick={this.deleteDb}>Delete All Data</Button>
-          <div id="drag"></div>
+          {this.state.showButtonFlag === true && (
+            <div>
+              <p>Predict the Market</p>
+              <Button bsStyle='primary' className='submit-prediction' onClick={this.onSubmit}>Submit Prediction</Button>
+              <Button bsStyle='primary' className='see-average' onClick={this.getAverage}>See Average</Button>
+              <Button bsStyle='danger' className='clear-db' onClick={this.deleteDb}>Delete All Data</Button>
+              <div id="drag"></div>
+            </div>
+          )}
         </div>
       );
     }
