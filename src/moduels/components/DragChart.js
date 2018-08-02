@@ -34,7 +34,7 @@ class Dragchart extends Component {
       { year: 2015, debt: 73.6 },
     ];
 
-    axios('https://cors-anywhere.herokuapp.com/https://gcfvlmkr59.execute-api.us-west-2.amazonaws.com/beta/getAverage', {
+    axios('https://gcfvlmkr59.execute-api.us-west-2.amazonaws.com/beta/getAverage', {
       headers: {
         'Accept': 'application/json',
       }
@@ -185,7 +185,7 @@ class Dragchart extends Component {
   getAverage = () => {
     let avrgs = [];
     let averages = JSON.parse(localStorage.getItem('averages'));
-    Object.keys(averages).forEach(function(key) {
+    Object.keys(averages).forEach( key => {
       avrgs.push({
         year: parseInt(key, 10),
         debt: averages[key]
@@ -194,7 +194,18 @@ class Dragchart extends Component {
     this.setState({averageData: avrgs});
   }
   deleteDb = () => {
-    console.log("----------Delete DB----------");
+    axios.delete('https://c1cz2t7guf.execute-api.us-west-2.amazonaws.com/default/deleteDB')
+    .then(res => {
+      let status = JSON.parse(res.data);
+      console.log(status);
+
+      if (status.status === "success") {
+        alert("Successfully the DB contents");
+      }
+    })
+    .catch(err => {
+      alert(err);
+    })
   }
 
   render() {
