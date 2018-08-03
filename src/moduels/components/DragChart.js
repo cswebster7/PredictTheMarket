@@ -21,7 +21,18 @@ class Dragchart extends Component {
         { year: 2022, debt: 0 },
         { year: 2023, debt: 0 },
         { year: 2024, debt: 0 },
-        { year: 2025, debt: 0 }
+        { year: 2025, debt: 0 },
+        { year: 2026, debt: 0 },
+        { year: 2027, debt: 0 },
+        { year: 2028, debt: 0 },
+        { year: 2029, debt: 0 },
+        { year: 2030, debt: 0 },
+        { year: 2031, debt: 0 },
+        { year: 2032, debt: 0 },
+        { year: 2033, debt: 0 },
+        { year: 2034, debt: 0 },
+        { year: 2035, debt: 0 },
+        { year: 2036, debt: 0 }
       ],
       showButtonFlag: false,
       guessGraphData: {},
@@ -33,6 +44,11 @@ class Dragchart extends Component {
 
   componentDidMount() {
     let data = [
+      { year: 1996, debt: 25.4 },
+      { year: 1997, debt: 26.4 },
+      { year: 1998, debt: 27.4 },
+      { year: 1999, debt: 28.4 },
+      { year: 2000, debt: 29.4 },
       { year: 2001, debt: 31.4 },
       { year: 2002, debt: 32.6 },
       { year: 2003, debt: 34.5 },
@@ -66,7 +82,7 @@ class Dragchart extends Component {
 
     dragwRangeInfo.svg.append('rect').at({ width: dragwRangeInfo.width, height: dragwRangeInfo.height, opacity: 0 });
 
-    dragwRangeInfo.x.domain([2001, 2025]);
+    dragwRangeInfo.x.domain([1996, 2036]);
     dragwRangeInfo.y.domain([0, 100]);
 
     dragwRangeInfo.xAxis.ticks(6).tickFormat(ƒ());
@@ -111,7 +127,7 @@ class Dragchart extends Component {
     let completed = false;
     let drag = d3.drag().on('drag', function() {
       let pos = d3.mouse(this);
-      let year = clamp(2016, 2025, dragwRangeInfo.x.invert(pos[0]));
+      let year = clamp(2016, 2036, dragwRangeInfo.x.invert(pos[0]));
       let debt = clamp(0, dragwRangeInfo.y.domain()[1], dragwRangeInfo.y.invert(pos[1]));
 
       userGraphData.forEach(function(d) {
@@ -129,7 +145,7 @@ class Dragchart extends Component {
         clipRect
           .transition()
           .duration(5000)
-          .attr('width', dragwRangeInfo.x(2025));
+          .attr('width', dragwRangeInfo.x(2036));
       }
     });
 

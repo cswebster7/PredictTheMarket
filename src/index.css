@@ -57,21 +57,21 @@ p {
 .submit-prediction {
   position: absolute;
   top: 43%;
-  left: 30%;
+  left: 15%;
   width: 200px;
 }
 
 .see-average {
   position: absolute;
   top: 48%;
-  left: 30%;
+  left: 15%;
   width: 200px;
 }
 
 .clear-db {
   position: absolute;
   top: 53%;
-  left: 30%;
+  left: 15%;
   width: 200px;
 }
 .error-message {
