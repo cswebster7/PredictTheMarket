@@ -149,7 +149,7 @@ class Dragchart extends Component {
       data: requestData
     })
     .then((res) => {
-      console.log(res);
+      alert("Your process has been successfully completed.!!!");
       let averages = res.data.body;
       localStorage.setItem('averages', JSON.stringify(averages));
       this.setState({seeAverageButtonState: false});
@@ -199,8 +199,10 @@ class Dragchart extends Component {
   }
 
 
-  drawAverageGraphRender() {
-    let { dragwRangeInfo, guessGraphData, averageData } = this.state;
+  drawAverageGraphRender(averageData) {
+    d3.select('.arear').remove();
+    d3.select('.liner').remove();
+    let { dragwRangeInfo, guessGraphData } = this.state;
 
     let ƒ = d3.f;
 
@@ -220,7 +222,7 @@ class Dragchart extends Component {
   };
 
   render() {
-    const { seeAverageButtonState } = this.state;
+    const { seeAverageButtonState, averageData } = this.state;
     return (
         <div className="mainWidget">
           {this.state.showErrorModal === true && (
@@ -238,7 +240,7 @@ class Dragchart extends Component {
             <div id="drag"></div>
           </div>
 
-          {this.state.showAverageGraph === true && this.drawAverageGraphRender()}
+          {this.state.showAverageGraph === true && this.drawAverageGraphRender(averageData)}
         </div>
       );
     }
