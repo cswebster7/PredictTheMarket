@@ -41,6 +41,7 @@ body{
 }
 
 .your-line{
+  fill:none;
   stroke: #f0f;
   stroke-width: 3;
   stroke-dasharray: 5 5;
