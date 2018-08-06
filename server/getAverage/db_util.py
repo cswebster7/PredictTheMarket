@@ -1,12 +1,12 @@
 #!/usr/bin/python
 import psycopg2
 
-db_host = 'predictiondb.c4ett03rbhmd.us-west-2.rds.amazonaws.com'
-db_port = 5559
-db_name = "predictiondatabase"
-db_user = "master"
-db_pass = "password"
-db_table = "prediction"
+db_host = "DATABASE_URL"
+db_port = "PORT"
+db_name = "DB_NAME"
+db_user = "DB_USERNAME"
+db_pass = "DB_PASSWORD"
+db_table = "DB_TABLE"
 
 
 def make_conn():
