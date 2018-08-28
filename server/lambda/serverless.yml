@@ -27,6 +27,13 @@ provider:
 functions:
   pred:
     handler: cognitosync.handler
+    environment:
+      DB_HOST: 'predictiondb.c4ett03rbhmd.us-west-2.rds.amazonaws.com'
+      DB_PORT: 5559
+      DB_USERNAME: master
+      DB_PASSWORD: password
+      DB_NAME : predictiondatabase
+
 
 
 plugins:
