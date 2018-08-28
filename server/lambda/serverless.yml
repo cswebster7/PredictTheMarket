@@ -1,0 +1,33 @@
+
+service: cognitosync
+custom:
+  pythonRequirements:
+    pythonBin: /home/sarthak/anaconda3/bin/python3
+
+provider:
+  name: aws
+  runtime: python3.6
+  region: us-west-2
+  memorySize: 512
+  timeout: 300
+
+  environment:
+    REGION: us-west-2
+
+  iamRoleStatements:
+    - Effect: Allow
+      Resource: "*"
+      Action:
+        - "lambda:*"
+    - Effect: Allow
+      Resource: "*"
+      Action:
+        - "cloudwatch:*"
+
+functions:
+  pred:
+    handler: cognitosync.handler
+
+
+plugins:
+  - serverless-python-requirements
