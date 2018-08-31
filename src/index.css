@@ -3,45 +3,45 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
-svg{
+svg {
   overflow: visible;
   background-color: white;
 }
 
-body{
+body {
   font-family: monospace;
   margin: 40px !important;
   margin-top: 150px !important;
-  overflow: hidden;
+  /* overflow: hidden; */
   background-color: #235b98 !important;
 }
 
-.axis{
-  opacity: .5;
+.axis {
+  opacity: 0.5;
 }
 
-.line{
+.line {
   fill: none;
   stroke: #93c55f;
   stroke-width: 3;
 }
 
-.area{
+.area {
   fill: #e2f1d4;
 }
 
-.arear{
+.arear {
   fill: #daeeff;
 }
 
-.liner{
+.liner {
   fill: none;
   stroke: #70baff;
   stroke-width: 3;
 }
 
-.your-line{
-  fill:none;
+.your-line {
+  fill: none;
   stroke: #f0f;
   stroke-width: 3;
   stroke-dasharray: 5 5;

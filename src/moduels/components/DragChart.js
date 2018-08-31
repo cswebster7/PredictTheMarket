@@ -226,13 +226,15 @@ class Dragchart extends Component {
   };
 
   saveDebutValue = debutValue => {
+    let idToken = localStorage.getItem("CognitoIdentityServiceProvider.7m215sihsv1h9juaej206lempi.lambda-test.idToken");
     let requestData = {
       data: debutValue
     };
     axios({
       method: "post",
       url:
-        "https://4bi7twv6tk.execute-api.us-west-2.amazonaws.com/default/getPrediction",
+        "https://u2qgvn2qw7.execute-api.us-west-2.amazonaws.com/dev/getPredictionDev/test",
+      header:{"Authorization" : idToken },
       data: requestData
     })
       .then(res => {
@@ -272,15 +274,21 @@ class Dragchart extends Component {
   };
 
   deleteDb = () => {
+    let idToken = localStorage.getItem("CognitoIdentityServiceProvider.7m215sihsv1h9juaej206lempi.lambda-test.idToken");
+    const headers = {
+		'Authorization': idToken
+	}
     axios
       .delete(
-        "https://c1cz2t7guf.execute-api.us-west-2.amazonaws.com/default/deleteDB"
+        "https://30xqj3oo9d.execute-api.us-west-2.amazonaws.com/dev/deleteDBdev", {headers}
+	
       )
       .then(res => {
-        let status = JSON.parse(res.data);
+        let status = res.data;
+        console.log(status);
 
         if (status.status === "success") {
-          alert("Successfully the DB contents");
+          alert("Successfully the DB contents......");
         }
       })
       .catch(err => {

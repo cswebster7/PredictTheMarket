@@ -16,6 +16,7 @@ Amplify.configure({
 class Login extends Component {
   constructor(props) {
     super(props);
+    this.cookies = new Cookies();
 
     this.state = {
       confirm_password: "",
@@ -25,8 +26,9 @@ class Login extends Component {
       authCode: "",
       showAuth: false,
       showSignUp: false,
-      showLogin: true,
-      showMain: false
+      showLogin: false,
+      showMain: false,
+      xfactor: null
     };
   }
 
@@ -44,8 +46,20 @@ class Login extends Component {
     Auth.signIn(email, password)
       .then(() => {
         Auth.currentSession().then(x => {
-          const cookies = new Cookies();
-          cookies.set("token", x.getIdToken().getJwtToken());
+          this.setState({
+            xfactor: x.getIdToken().getJwtToken()
+          });
+          // console.log(this.state.xfactor);
+
+          // localStorage.setItem("token", x.getIdToken().getJwtToken());
+          console.log(
+            localStorage.getItem(
+              "CognitoIdentityServiceProvider.7m215sihsv1h9juaej206lempi.lambda-test.accessToken"
+            )
+          );
+          this.cookies.set("token", x.getIdToken().getJwtToken(), {
+            path: "/"
+          });
         });
         this.setState({
           showLogin: false,
@@ -90,12 +104,13 @@ class Login extends Component {
 
   logOut = event => {
     Auth.signOut()
-      .then(data => console.log(data))
       .then(() => {
         this.setState({
           showMain: false,
           showLogin: true
         });
+        localStorage.clear();
+        this.cookies.remove("token", { path: "/" });
       })
       .catch(err => console.log(err));
     event.preventDefault();
@@ -122,10 +137,40 @@ class Login extends Component {
     event.preventDefault();
   };
 
+  componentDidMount() {
+    if (
+      localStorage.getItem(
+        "CognitoIdentityServiceProvider.7m215sihsv1h9juaej206lempi.lambda-test.accessToken"
+      ) != null
+    ) {
+      this.setState({
+        showMain: true,
+        showLogin: false
+      });
+    } else {
+      this.setState({
+        showMain: false,
+        showLogin: true
+      });
+    }
+  }
+
   render() {
     return (
       <div className="Login">
         <p>Predict the Market</p>
+
+        {/* {localStorage.getItem(
+          "CognitoIdentityServiceProvider.7m215sihsv1h9juaej206lempi.lambda-test.accessToken"
+        ) != null
+          ? this.setState({
+              showMain: true,
+              showLogin: false
+            })
+          : this.setState({
+              showMain: false,
+              showLogin: true
+            })} */}
 
         {this.state.showMain ? (
           <div>
