@@ -38,7 +38,7 @@ functions:
       DB_NAME: predictiondatabase
     events:
     - http:
-        path: getPredictionDev/test
+        path: getPredictionDev
         method: post
         cors : true
         authorizer:

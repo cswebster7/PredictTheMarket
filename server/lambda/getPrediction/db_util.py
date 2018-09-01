@@ -1,29 +1,26 @@
 #!/usr/bin/python
 import psycopg2
+import os
+import logging
 
-db_host = "DATABASE_URL"
-db_port = "PORT"
-db_name = "DB_NAME"
-db_user = "DB_USERNAME"
-db_pass = "DB_PASSWORD"
-db_table = "DB_TABLE"
-
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 def make_conn():
     conn = None
     try:
-        conn = psycopg2.connect(    host=db_host,
-                                    database=db_name,
-                                    user=db_user,
-                                    password=db_pass,
-                                    port=db_port)
+        conn = psycopg2.connect(host=os.environ["DB_HOST"],
+                                database=os.environ["DB_NAME"],
+                                user=os.environ["DB_USERNAME"],
+                                password=os.environ["DB_PASSWORD"],
+                                port=os.environ["DB_PORT"])
     except:
-        print "I am unable to connect to the database"
+        logger.error("ERROR: Unexpected error: Could not connect to PostgresQL instance.")
     return conn
 
 
 def fetch_data(conn, query):
     result = []
-    print "Now executing: %s" % (query)
+    # print "Now executing: %s" % (query)
     cursor = conn.cursor()
     cursor.execute(query)
 

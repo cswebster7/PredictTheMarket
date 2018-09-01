@@ -1,12 +1,20 @@
 #!/usr/bin/python
+import sys
+import logging
+import psycopg2
 import datetime
 import json
-
+import logging
 from db_util import make_conn, fetch_data
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def handler(event, context):
     averageObj = [];
+
+    logger.info('got eventfromcall{}'.format(event))
 
     query_cmd = "select count(*) from prediction"
 
@@ -15,6 +23,7 @@ def handler(event, context):
     cur = conn.cursor()
 
     events = fetch_data(conn, """SELECT event from prediction""")
+    logger.info('got eventfromUtil{}'.format(events))
 
     dicAverage = {}
     for data in events:
@@ -25,11 +34,11 @@ def handler(event, context):
             dicAverage[str(json_dict[u'year'])] = [json_dict[u'debt']]
 
     submission_date = datetime.datetime.now()
-    print ("---> submission date\n", submission_date, "\n")
+    print("---> submission date\n", submission_date, "\n")
 
     averages = {}
-
-    for data in event['data']:
+    body = json.loads(event["body"])
+    for data in body['data']:
         def sum_list(items):
             sum_numbers = 0
             for x in items:
@@ -51,9 +60,11 @@ def handler(event, context):
 
     return {
         'statusCode': 200,
-        'headers': {'Content-Type': 'application/json'},
-        'body': averages
+        'headers': {"Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Credentials": True,
+                    "Access-Control-Headers": "*",
+                    'Content-Type': 'application/json'},
+        'body': json.dumps({
+            "averages" : averages
+        })
     }
-
-
-

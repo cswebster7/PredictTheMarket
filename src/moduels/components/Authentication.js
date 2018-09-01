@@ -46,17 +46,8 @@ class Login extends Component {
     Auth.signIn(email, password)
       .then(() => {
         Auth.currentSession().then(x => {
-          this.setState({
-            xfactor: x.getIdToken().getJwtToken()
-          });
-          // console.log(this.state.xfactor);
 
-          // localStorage.setItem("token", x.getIdToken().getJwtToken());
-          console.log(
-            localStorage.getItem(
-              "CognitoIdentityServiceProvider.7m215sihsv1h9juaej206lempi.lambda-test.accessToken"
-            )
-          );
+          localStorage.setItem("token", x.getIdToken().getJwtToken());
           this.cookies.set("token", x.getIdToken().getJwtToken(), {
             path: "/"
           });
@@ -139,9 +130,7 @@ class Login extends Component {
 
   componentDidMount() {
     if (
-      localStorage.getItem(
-        "CognitoIdentityServiceProvider.7m215sihsv1h9juaej206lempi.lambda-test.accessToken"
-      ) != null
+      localStorage.getItem("token") != null
     ) {
       this.setState({
         showMain: true,
@@ -159,19 +148,6 @@ class Login extends Component {
     return (
       <div className="Login">
         <p>Predict the Market</p>
-
-        {/* {localStorage.getItem(
-          "CognitoIdentityServiceProvider.7m215sihsv1h9juaej206lempi.lambda-test.accessToken"
-        ) != null
-          ? this.setState({
-              showMain: true,
-              showLogin: false
-            })
-          : this.setState({
-              showMain: false,
-              showLogin: true
-            })} */}
-
         {this.state.showMain ? (
           <div>
             <botton
