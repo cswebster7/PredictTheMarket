@@ -36,6 +36,7 @@ def handler(event, context):
     submission_date = datetime.datetime.now()
     print("---> submission date\n", submission_date, "\n")
 
+    ui = event['requestContext']['authorizer']['claims']['sub']
     averages = {}
     body = json.loads(event["body"])
     for data in body['data']:
@@ -52,8 +53,8 @@ def handler(event, context):
 
         averages[str(data['year'])] = average
 
-        cur.execute("""INSERT INTO prediction (event, submission_date, average) VALUES (%s::json, %s, %s);""",
-                    (json.dumps(data), submission_date, average))
+        cur.execute("""INSERT INTO prediction (event, submission_date, average, userId) VALUES (%s::json, %s, %s, %s);""",
+                    (json.dumps(data), submission_date, average, ui))
 
     conn.commit()
     conn.close()
