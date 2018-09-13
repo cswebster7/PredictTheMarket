@@ -4,6 +4,8 @@ import * as d3 from '../../libraries/d3Library/d3v4.js';
 import { Button, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
+import Select from 'react-select';
+
 class Dragchart extends Component {
   constructor(props) {
     super(props)
@@ -11,63 +13,53 @@ class Dragchart extends Component {
       debutData: {},
       showErrorModal: false,
       averageData: [
-        { year: 2015, debt: 73.6 },
-        { year: 2016, debt: 0 },
-        { year: 2017, debt: 0 },
-        { year: 2018, debt: 0 },
-        { year: 2019, debt: 0 },
-        { year: 2020, debt: 0 },
-        { year: 2021, debt: 0 },
-        { year: 2022, debt: 0 },
-        { year: 2023, debt: 0 },
-        { year: 2024, debt: 0 },
-        { year: 2025, debt: 0 },
-        { year: 2026, debt: 0 },
-        { year: 2027, debt: 0 },
-        { year: 2028, debt: 0 },
-        { year: 2029, debt: 0 },
-        { year: 2030, debt: 0 },
-        { year: 2031, debt: 0 },
-        { year: 2032, debt: 0 },
-        { year: 2033, debt: 0 },
-        { year: 2034, debt: 0 },
-        { year: 2035, debt: 0 },
-        { year: 2036, debt: 0 }
       ],
       showButtonFlag: false,
       guessGraphData: {},
       showAverageGraph: false,
       dragwRangeInfo: {},
       seeAverageButtonState: true,
+      data: [
+        { date: '2018-06-14', vol: 73.6 },
+        { date: '2018-06-24', vol: 89 },
+        { date: '2018-07-14', vol: 55 },
+        { date: '2018-07-24', vol: 65 },
+        { date: '2018-08-14', vol: 70 },
+        { date: '2018-09-13', vol: 55 }
+    ]
     };
   }
 
-  componentDidMount() {
-    let data = [
-      { year: 1996, debt: 25.4 },
-      { year: 1997, debt: 26.4 },
-      { year: 1998, debt: 27.4 },
-      { year: 1999, debt: 28.4 },
-      { year: 2000, debt: 29.4 },
-      { year: 2001, debt: 31.4 },
-      { year: 2002, debt: 32.6 },
-      { year: 2003, debt: 34.5 },
-      { year: 2004, debt: 35.5 },
-      { year: 2005, debt: 35.6 },
-      { year: 2006, debt: 35.3 },
-      { year: 2007, debt: 35.2 },
-      { year: 2008, debt: 39.3 },
-      { year: 2009, debt: 52.3 },
-      { year: 2010, debt: 60.9 },
-      { year: 2011, debt: 65.9 },
-      { year: 2012, debt: 70.4 },
-      { year: 2013, debt: 72.6 },
-      { year: 2014, debt: 74.4 },
-      { year: 2015, debt: 73.6 },
-    ];
+  drawGraphInfo = () => {
+    let { data } = this.state;
 
-    let { averageData } = this.state;
+    var parseTime = d3.timeParse("%Y-%m-%d");
+    data.forEach(function(d) {
+        d.date = parseTime(d.date);
+    });
 
+    var today = new Date();
+    let start_date = today.setMonth(today.getMonth()-3);
+    let end_date = today.setMonth(today.getMonth()+6);
+    today.setMonth(today.getMonth()-3);
+    let tomorrow = today.setDate(today.getDate()+1);
+    today.setDate(today.getDate()-1);
+    
+    let averageData = [];
+    for (let date = new Date(today.valueOf()); date <= end_date; date.setDate(date.getDate()+1)) {
+      if (date.valueOf() === today.valueOf()) {
+        averageData.push({
+          date: date.valueOf(),
+          vol: data[data.length - 1].vol
+        });
+      } else {
+        averageData.push({
+          date: date.valueOf(),
+          vol: 0
+        });
+      }
+    }
+    // let { averageData } = this.state;
     let ƒ = d3.f;
 
     let sel = d3.select('#drag').html('');
@@ -82,26 +74,26 @@ class Dragchart extends Component {
 
     dragwRangeInfo.svg.append('rect').at({ width: dragwRangeInfo.width, height: dragwRangeInfo.height, opacity: 0 });
 
-    dragwRangeInfo.x.domain([1996, 2036]);
-    dragwRangeInfo.y.domain([0, 100]);
+    dragwRangeInfo.x.domain([start_date, end_date]);
+    dragwRangeInfo.y.domain([0, d3.max(data, function(d) { return d.vol; }) * 2]);
 
-    dragwRangeInfo.xAxis.ticks(6).tickFormat(ƒ());
+    dragwRangeInfo.xAxis.tickFormat(d3.timeFormat("%Y-%m-%d"));
     dragwRangeInfo.yAxis.ticks(5).tickFormat(d => '$' + d);
 
     let area = d3
       .area()
-      .x(ƒ('year', dragwRangeInfo.x))
-      .y0(ƒ('debt', dragwRangeInfo.y))
+      .x(ƒ('date', dragwRangeInfo.x))
+      .y0(ƒ('vol', dragwRangeInfo.y))
       .y1(dragwRangeInfo.height);
     let line = d3
       .area()
-      .x(ƒ('year', dragwRangeInfo.x))
-      .y(ƒ('debt', dragwRangeInfo.y));
+      .x(ƒ('date', dragwRangeInfo.x))
+      .y(ƒ('vol', dragwRangeInfo.y));
 
     let clipRect = dragwRangeInfo.svg
       .append('clipPath#clip')
       .append('rect')
-      .at({ width: dragwRangeInfo.x(2015) - 2, height: dragwRangeInfo.height});
+      .at({ width: dragwRangeInfo.x(today.valueOf()), height: dragwRangeInfo.height});
 
     let correctSel = dragwRangeInfo.svg.append('g').attr('clip-path', 'url(#clip)');
     correctSel.append('path.area').at({ d: area(data) });
@@ -115,11 +107,11 @@ class Dragchart extends Component {
 
     let userGraphData = averageData
       .map(function(d) {
-        return { year: d.year, debt: d.debt, defined: 0 };
+        return { date: d.date, vol: d.vol, defined: 0 };
       })
       .filter(function(d) {
-        if (d.year === 2015) d.defined = true;
-        return d.year >= 2015;
+        if (d.date === today.valueOf()) d.defined = true;
+        return d.date >= today.valueOf();
       });
 
     const that = this;
@@ -127,12 +119,12 @@ class Dragchart extends Component {
     let completed = false;
     let drag = d3.drag().on('drag', function() {
       let pos = d3.mouse(this);
-      let year = clamp(2016, 2036, dragwRangeInfo.x.invert(pos[0]));
-      let debt = clamp(0, dragwRangeInfo.y.domain()[1], dragwRangeInfo.y.invert(pos[1]));
+      let date = clamp(today.valueOf(), end_date, dragwRangeInfo.x.invert(pos[0]));
+      let vol = clamp(0, dragwRangeInfo.y.domain()[1], dragwRangeInfo.y.invert(pos[1]));
 
       userGraphData.forEach(function(d) {
-        if (Math.abs(d.year - year) < 0.5) {
-          d.debt = debt;
+        if (Math.abs(d.date - date) < 43200000) {
+          d.vol = vol;
           d.defined = true;
         }
       });
@@ -145,7 +137,7 @@ class Dragchart extends Component {
         clipRect
           .transition()
           .duration(5000)
-          .attr('width', dragwRangeInfo.x(2036));
+          .attr('width', dragwRangeInfo.x(end_date));
       }
     });
 
@@ -155,10 +147,21 @@ class Dragchart extends Component {
     }
   }
 
-  saveDebutValue = (debutValue) => {
-     let idToken = localStorage.getItem(
-      "token"
+  componentDidMount() {
+    this.drawGraphInfo();
+    axios.get('https://api.iextrading.com/1.0/ref-data/symbols').then(res => {
+      this.setState({
+        symbols: res.data.map(item => ({
+          label: item.name,
+          value: item.symbol
+        }))
+      });
+    });
+  }
 
+  saveDebutValue = (debutValue) => {
+    let idToken = localStorage.getItem(
+      "token"
     );
     let requestData = {
       data: debutValue
@@ -231,7 +234,7 @@ class Dragchart extends Component {
     Object.keys(averages).forEach( key => {
       avrgs.push({
         year: parseInt(key, 10),
-        debt: averages[key]
+        vol: averages[key]
       })
     });
     this.setState({averageData: avrgs, showAverageGraph: true});
@@ -248,21 +251,28 @@ class Dragchart extends Component {
 
     const arear = d3
       .area()
-      .x(ƒ('year', dragwRangeInfo.x))
-      .y0(ƒ('debt', dragwRangeInfo.y))
+      .x(ƒ('date', dragwRangeInfo.x))
+      .y0(ƒ('vol', dragwRangeInfo.y))
       .y1(dragwRangeInfo.height);
 
     const liner = d3
       .area()
-      .x(ƒ('year', dragwRangeInfo.x))
-      .y(ƒ('debt', dragwRangeInfo.y));
+      .x(ƒ('date', dragwRangeInfo.x))
+      .y(ƒ('vol', dragwRangeInfo.y));
 
     guessGraphData.append('path.arear').at({ d: arear(averageData)});
     guessGraphData.append('path.liner').at({ d: liner(averageData)});
   };
 
+  handleSelectSymbol = (item) => {
+    axios.get(`https://api.iextrading.com/1.0/stock/${item.value}/chart/3m`).then(res => {
+      this.setState({data: res.data.map(data => ({ date: data.date, vol: data.volume }))});
+      this.drawGraphInfo();
+    });
+  };
+
   render() {
-    const { seeAverageButtonState, averageData } = this.state;
+    const { seeAverageButtonState, averageData, symbols } = this.state;
     return (
         <div className="mainWidget">
           {this.state.showErrorModal === true && (
@@ -271,6 +281,12 @@ class Dragchart extends Component {
               <Button bsStyle='danger' className="error-message" onClick={this.handleDismiss}>Close</Button>
             </Alert>
           )}
+
+          <Select 
+            options={symbols}
+            onChange={this.handleSelectSymbol}
+            placeholder='Search...'
+          />
 
           <div>
             {/*<p>Predict the Market</p>*/}
