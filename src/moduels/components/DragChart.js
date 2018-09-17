@@ -20,12 +20,12 @@ class Dragchart extends Component {
       dragwRangeInfo: {},
       seeAverageButtonState: true,
       data: [
-        { date: '2018-06-14', vol: 73.6 },
-        { date: '2018-06-24', vol: 89 },
-        { date: '2018-07-14', vol: 55 },
-        { date: '2018-07-24', vol: 65 },
-        { date: '2018-08-14', vol: 70 },
-        { date: '2018-09-13', vol: 55 }
+        { date: '2018-06-14', closePrice: 73.6 },
+        { date: '2018-06-24', closePrice: 89 },
+        { date: '2018-07-14', closePrice: 55 },
+        { date: '2018-07-24', closePrice: 65 },
+        { date: '2018-08-14', closePrice: 70 },
+        { date: '2018-09-17', closePrice: 55 }
     ]
     };
   }
@@ -46,16 +46,16 @@ class Dragchart extends Component {
     today.setDate(today.getDate()-1);
     
     let averageData = [];
-    for (let date = new Date(today.valueOf()); date <= end_date; date.setDate(date.getDate()+1)) {
-      if (date.valueOf() === today.valueOf()) {
+    for (let date = new Date(data[data.length - 1].date.valueOf()); date <= end_date; date.setDate(date.getDate()+1)) {
+      if (date.valueOf() === data[data.length - 1].date.valueOf()) {
         averageData.push({
           date: date.valueOf(),
-          vol: data[data.length - 1].vol
+          closePrice: data[data.length - 1].closePrice
         });
       } else {
         averageData.push({
           date: date.valueOf(),
-          vol: 0
+          closePrice: 0
         });
       }
     }
@@ -75,7 +75,7 @@ class Dragchart extends Component {
     dragwRangeInfo.svg.append('rect').at({ width: dragwRangeInfo.width, height: dragwRangeInfo.height, opacity: 0 });
 
     dragwRangeInfo.x.domain([start_date, end_date]);
-    dragwRangeInfo.y.domain([0, d3.max(data, function(d) { return d.vol; }) * 2]);
+    dragwRangeInfo.y.domain([0, data[data.length - 1].closePrice * 2]);
 
     dragwRangeInfo.xAxis.tickFormat(d3.timeFormat("%Y-%m-%d"));
     dragwRangeInfo.yAxis.ticks(5).tickFormat(d => '$' + d);
@@ -83,12 +83,12 @@ class Dragchart extends Component {
     let area = d3
       .area()
       .x(ƒ('date', dragwRangeInfo.x))
-      .y0(ƒ('vol', dragwRangeInfo.y))
+      .y0(ƒ('closePrice', dragwRangeInfo.y))
       .y1(dragwRangeInfo.height);
     let line = d3
       .area()
       .x(ƒ('date', dragwRangeInfo.x))
-      .y(ƒ('vol', dragwRangeInfo.y));
+      .y(ƒ('closePrice', dragwRangeInfo.y));
 
     let clipRect = dragwRangeInfo.svg
       .append('clipPath#clip')
@@ -107,11 +107,11 @@ class Dragchart extends Component {
 
     let userGraphData = averageData
       .map(function(d) {
-        return { date: d.date, vol: d.vol, defined: 0 };
+        return { date: d.date, closePrice: d.closePrice, defined: 0 };
       })
       .filter(function(d) {
-        if (d.date === today.valueOf()) d.defined = true;
-        return d.date >= today.valueOf();
+        if (d.date === data[data.length - 1].date.valueOf()) d.defined = true;
+        return d.date >= data[data.length - 1].date.valueOf();
       });
 
     const that = this;
@@ -119,12 +119,12 @@ class Dragchart extends Component {
     let completed = false;
     let drag = d3.drag().on('drag', function() {
       let pos = d3.mouse(this);
-      let date = clamp(today.valueOf(), end_date, dragwRangeInfo.x.invert(pos[0]));
-      let vol = clamp(0, dragwRangeInfo.y.domain()[1], dragwRangeInfo.y.invert(pos[1]));
+      let date = clamp(data[data.length - 1].date.valueOf(), end_date, dragwRangeInfo.x.invert(pos[0]));
+      let closePrice = clamp(0, dragwRangeInfo.y.domain()[1], dragwRangeInfo.y.invert(pos[1]));
 
       userGraphData.forEach(function(d) {
         if (Math.abs(d.date - date) < 43200000) {
-          d.vol = vol;
+          d.closePrice = closePrice;
           d.defined = true;
         }
       });
@@ -234,7 +234,7 @@ class Dragchart extends Component {
     Object.keys(averages).forEach( key => {
       avrgs.push({
         year: parseInt(key, 10),
-        vol: averages[key]
+        closePrice: averages[key]
       })
     });
     this.setState({averageData: avrgs, showAverageGraph: true});
@@ -252,13 +252,13 @@ class Dragchart extends Component {
     const arear = d3
       .area()
       .x(ƒ('date', dragwRangeInfo.x))
-      .y0(ƒ('vol', dragwRangeInfo.y))
+      .y0(ƒ('closePrice', dragwRangeInfo.y))
       .y1(dragwRangeInfo.height);
 
     const liner = d3
       .area()
       .x(ƒ('date', dragwRangeInfo.x))
-      .y(ƒ('vol', dragwRangeInfo.y));
+      .y(ƒ('closePrice', dragwRangeInfo.y));
 
     guessGraphData.append('path.arear').at({ d: arear(averageData)});
     guessGraphData.append('path.liner').at({ d: liner(averageData)});
@@ -266,10 +266,20 @@ class Dragchart extends Component {
 
   handleSelectSymbol = (item) => {
     axios.get(`https://api.iextrading.com/1.0/stock/${item.value}/chart/3m`).then(res => {
-      this.setState({data: res.data.map(data => ({ date: data.date, vol: data.volume }))});
+      this.setState({data: res.data.map(data => ({ date: data.date, closePrice: data.close }))});
       this.drawGraphInfo();
     });
   };
+
+  _renderOption = (option) =>  {
+    const { innerProps, data } = option
+    return (
+      <div className="company-option" onClick={innerProps.onClick}>
+        {data.value}<br/>
+        <span className="company-label-select">{data.label}</span>
+      </div>
+    )
+  }
 
   render() {
     const { seeAverageButtonState, averageData, symbols } = this.state;
@@ -286,6 +296,7 @@ class Dragchart extends Component {
             options={symbols}
             onChange={this.handleSelectSymbol}
             placeholder='Search...'
+            components={{ Option: this._renderOption }}
           />
 
           <div>

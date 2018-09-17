@@ -63,6 +63,12 @@ p {
     margin-top: 5em;
 
 }
+.company-option:hover{
+  background-color: #c5def9
+}
+.company-label-select {
+  font-size: 10px;
+}
 
 .see-average {
   position: absolute;
