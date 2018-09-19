@@ -1,0 +1,40 @@
+
+service: cognitosync
+custom:
+  pythonRequirements:
+    pythonBin: /home/sarthak/anaconda3/bin/python3
+
+provider:
+  name: aws
+  runtime: python3.6
+  region: us-west-2
+  memorySize: 512
+  timeout: 300
+
+  environment:
+    REGION: us-west-2
+
+  iamRoleStatements:
+    - Effect: Allow
+      Resource: "*"
+      Action:
+        - "lambda:*"
+    - Effect: Allow
+      Resource: "*"
+      Action:
+        - "cloudwatch:*"
+
+functions:
+  pred:
+    handler: cognitosync.handler
+    environment:
+      DB_HOST: 'predictiondb.c4ett03rbhmd.us-west-2.rds.amazonaws.com'
+      DB_PORT: 5559
+      DB_USERNAME: master
+      DB_PASSWORD: password
+      DB_NAME : predictiondatabase
+
+
+
+plugins:
+  - serverless-python-requirements

@@ -1,10 +1,10 @@
-import React, { Component } from 'react';
-import DragChart from './moduels/components/DragChart.js';
+import React, { Component } from "react";
+import DragChart from "./moduels/components/DragChart.js";
+import Login from "./moduels/components/Authentication";
+
 class App extends Component {
   render() {
-    return (
-      <DragChart />
-    );
+    return <Login />;
   }
 }
-export default App;
+export default App
