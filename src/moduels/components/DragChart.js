@@ -5,6 +5,7 @@ import { Button, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 import Select from 'react-select';
+import 'react-select/dist/react-select.css';
 
 class Dragchart extends Component {
   constructor(props) {
@@ -192,7 +193,7 @@ class Dragchart extends Component {
     if (this.state.debutData)
     if (Object.keys(this.state.debutData).length > 0) {
       this.saveDebutValue(this.state.debutData);
-		console.log(this.state.debutData);
+    console.log(this.state.debutData);
     } else {
       this.setState({showErrorModal: true});
     }
@@ -272,11 +273,11 @@ class Dragchart extends Component {
   };
 
   _renderOption = (option) =>  {
-    const { innerProps, data } = option
+    const { label, value } = option
     return (
-      <div className="company-option" onClick={innerProps.onClick}>
-        {data.value}<br/>
-        <span className="company-label-select">{data.label}</span>
+      <div className="company-option">
+        {value}<br/>
+        <span className="company-label-select">{label}</span>
       </div>
     )
   }
@@ -296,7 +297,8 @@ class Dragchart extends Component {
             options={symbols}
             onChange={this.handleSelectSymbol}
             placeholder='Search...'
-            components={{ Option: this._renderOption }}
+            optionRenderer={ this._renderOption }
+            matchPos='start'
           />
 
           <div>
