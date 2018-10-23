@@ -159,8 +159,17 @@ class Dragchart extends Component {
         d.date = parseTime(d.date);
     });
 
-    let start_date = data[0].date;
-    let end_date = data[data.length-1].date;
+    var today = new Date();
+    let start_date;
+    let end_date;
+    if (data.length) {
+      start_date = data[0].date;
+      end_date = data[data.length-1].date;
+    }
+    else {
+      start_date = today.setMonth(today.getMonth()-3);
+      end_date = today.setMonth(today.getMonth()+6);
+    }
 
     // let { averageData } = this.state;
     let ƒ = d3.f;
@@ -178,7 +187,10 @@ class Dragchart extends Component {
     dragwRangeInfo.svg.append('rect').at({ width: dragwRangeInfo.width, height: dragwRangeInfo.height, opacity: 0 });
 
     dragwRangeInfo.x.domain([start_date, end_date]);
-    dragwRangeInfo.y.domain([0, data[data.length - 1].closePrice * 2]);
+    if (data.length)
+      dragwRangeInfo.y.domain([0, data[data.length - 1].closePrice * 2]);
+    else
+      dragwRangeInfo.y.domain([0, 100]);
 
     dragwRangeInfo.xAxis.tickFormat(d3.timeFormat("%Y-%m-%d"));
     dragwRangeInfo.yAxis.ticks(5).tickFormat(d => '$' + d);
@@ -299,30 +311,6 @@ class Dragchart extends Component {
       this.drawGraphInfoAverage();
     })
   }
-
-
-
-  drawAverageGraphRender(averageData) {
-    d3.select('.arear').remove();
-    d3.select('.liner').remove();
-    let { dragwRangeInfo, guessGraphData } = this.state;
-
-    let ƒ = d3.f;
-
-    const arear = d3
-      .area()
-      .x(ƒ('date', dragwRangeInfo.x))
-      .y0(ƒ('closePrice', dragwRangeInfo.y))
-      .y1(dragwRangeInfo.height);
-
-    const liner = d3
-      .area()
-      .x(ƒ('date', dragwRangeInfo.x))
-      .y(ƒ('closePrice', dragwRangeInfo.y));
-
-    guessGraphData.append('path.arear').at({ d: arear(averageData)});
-    guessGraphData.append('path.liner').at({ d: liner(averageData)});
-  };
 
   handleSelectSymbol = (item) => {
     this.setState({selectedCompany: item.value});
