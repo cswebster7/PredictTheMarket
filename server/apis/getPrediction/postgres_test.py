@@ -4,32 +4,28 @@ import logging
 import psycopg2
 import datetime
 import json
-
+import logging
 from db_util import make_conn, fetch_data
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+
 def lambda_handler(event, context):
-    
-    averageObj = [];
-    
-    query_cmd = "select count(*) from prediction"
+
+    logger.info('got eventfromcall{}'.format(event))
 
     conn = make_conn()
-    
-    cur = conn.cursor()
-    
-    events = fetch_data(conn, """SELECT event from prediction""")
 
-    dicAverage = {}
-    for data in events:
-        json_dict = list(data)[0]
-        if str(json_dict[u'year']) in dicAverage.keys():
-            dicAverage[str(json_dict[u'year'])].append(json_dict[u'debt'])
-        else:
-            dicAverage[str(json_dict[u'year'])] = [json_dict[u'debt']]
-    
+    cur = conn.cursor()
+
     submission_date = datetime.datetime.now()
     print ("---> submission date\n", submission_date, "\n")
     
-    averages = {}
+    company = event['company']
+    ui = event['user_id']
+
+    cur.execute("""UPDATE prediction SET recent=%s WHERE user_id=%s AND company=%s;""", ('False', ui, company));
     
     for data in event['data']:
         def sum_list(items):
@@ -38,21 +34,14 @@ def lambda_handler(event, context):
                 sum_numbers += x
             return sum_numbers
         
-        average = data['debt']
-        if dicAverage.get(str(data['year'])) is not None:
-            prev_debts = dicAverage[str(data['year'])]
-            average = (sum_list(prev_debts) + data['debt']) / (len(prev_debts) + 1)
-        
-        averages[str(data['year'])] = average
-        
-        cur.execute("""INSERT INTO prediction (event, submission_date, average) VALUES (%s::json, %s, %s);""", (json.dumps(data), submission_date, average))
-    
+        cur.execute("""INSERT INTO prediction (event, submission_date, company, user_id, recent) VALUES (%s::json, %s, %s, %s, %s);""", (json.dumps(data), submission_date, company, ui, 'True'))
+
     conn.commit()
     conn.close()
-    
+
     return {
         'statusCode': 200,
         'headers': { 'Content-Type': 'application/json' },
-        'body': averages
+        'body': 'Added to DB!'
     }
     

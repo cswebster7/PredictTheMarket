@@ -46,7 +46,10 @@ class Login extends Component {
     Auth.signIn(email, password)
       .then(() => {
         Auth.currentSession().then(x => {
-
+          localStorage.setItem("user_id", x.idToken.payload.sub);
+          this.cookies.set("user_id", x.idToken.payload.sub, {
+            path: "/"
+          });
           localStorage.setItem("token", x.getIdToken().getJwtToken());
           this.cookies.set("token", x.getIdToken().getJwtToken(), {
             path: "/"

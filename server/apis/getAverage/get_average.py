@@ -8,24 +8,38 @@ import json
 from db_util import make_conn, fetch_data
 
 def lambda_handler(event, context):
-    
-    query_cmd = "select count(*) from prediction"
+
+    average = {}
+
+    averageData = []
 
     conn = make_conn()
-    
+
     cur = conn.cursor()
-    
-    lastUpdateDate = list(fetch_data(conn, """SELECT submission_date from prediction ORDER BY submission_date DESC Limit 1""")[0])[0]
-    cur.execute("""SELECT * from prediction WHERE submission_date = '%s';""" % (lastUpdateDate))
+
+    company = event['params']['querystring']['company'];
+
+    cur.execute("""SELECT event from prediction WHERE company = '%s' AND recent = '%s';""" % (company, 'True'))
     rawData = cur.fetchall()
 
-    arrAverage = []
     for data in rawData:
-        json_data = list(data)
-        arrAverage.append({
-            'year': json_data[0][u'year'],
-            'debt': json_data[1]
+        if data[0]['date'] in average:
+            average[data[0]['date']]['sum'] += data[0]['closePrice']
+            average[data[0]['date']]['counts'] += 1
+        else:
+            average[data[0]['date']] = {}
+            average[data[0]['date']]['sum'] = data[0]['closePrice']
+            average[data[0]['date']]['counts'] = 1
+
+    for key, value in average.iteritems():
+        averageData.append({
+            'date': datetime.datetime.fromtimestamp(float(key)/1000.0).strftime('%Y-%m-%d'),
+            'closePrice': value['sum']/value['counts']
         })
-    conn.close()
-    return json.dumps({'averages': arrAverage})
-    
+
+    averageData = sorted(averageData, key=lambda k: k['date'])
+
+    return {
+        'company': event['params']['querystring']['company'],
+        'averageData': averageData
+    }

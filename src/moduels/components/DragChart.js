@@ -13,6 +13,7 @@ class Dragchart extends Component {
     this.state = {
       debutData: {},
       showErrorModal: false,
+      user_id: localStorage.getItem("user_id"),
       averageData: [
       ],
       showButtonFlag: false,
@@ -20,6 +21,7 @@ class Dragchart extends Component {
       showAverageGraph: false,
       dragwRangeInfo: {},
       seeAverageButtonState: true,
+      selectedCompany: "",
       data: [
         { date: '2018-06-14', closePrice: 73.6 },
         { date: '2018-06-24', closePrice: 89 },
@@ -60,6 +62,7 @@ class Dragchart extends Component {
         });
       }
     }
+
     // let { averageData } = this.state;
     let ƒ = d3.f;
 
@@ -148,6 +151,64 @@ class Dragchart extends Component {
     }
   }
 
+  drawGraphInfoAverage = () => {
+    let { data } = this.state;
+
+    var parseTime = d3.timeParse("%Y-%m-%d");
+    data.forEach(function(d) {
+        d.date = parseTime(d.date);
+    });
+
+    let start_date = data[0].date;
+    let end_date = data[data.length-1].date;
+
+    // let { averageData } = this.state;
+    let ƒ = d3.f;
+
+    let sel = d3.select('#drag').html('');
+
+    let dragwRangeInfo = d3.conventions({
+      parentSel: sel,
+      totalWidth: sel.node().offsetWidth,
+      height: 400,
+      margin: { left: 50, right: 50, top: 30, bottom: 30 }
+    });
+    this.setState({dragwRangeInfo});
+
+    dragwRangeInfo.svg.append('rect').at({ width: dragwRangeInfo.width, height: dragwRangeInfo.height, opacity: 0 });
+
+    dragwRangeInfo.x.domain([start_date, end_date]);
+    dragwRangeInfo.y.domain([0, data[data.length - 1].closePrice * 2]);
+
+    dragwRangeInfo.xAxis.tickFormat(d3.timeFormat("%Y-%m-%d"));
+    dragwRangeInfo.yAxis.ticks(5).tickFormat(d => '$' + d);
+
+    let area = d3
+      .area()
+      .x(ƒ('date', dragwRangeInfo.x))
+      .y0(ƒ('closePrice', dragwRangeInfo.y))
+      .y1(dragwRangeInfo.height);
+    let line = d3
+      .area()
+      .x(ƒ('date', dragwRangeInfo.x))
+      .y(ƒ('closePrice', dragwRangeInfo.y));
+
+    let clipRect = dragwRangeInfo.svg
+      .append('clipPath#clip')
+      .append('rect')
+      .at({ width: dragwRangeInfo.width, height: dragwRangeInfo.height});
+
+    let correctSel = dragwRangeInfo.svg.append('g').attr('clip-path', 'url(#clip)');
+    correctSel.append('path.area').at({ d: area(data) });
+    correctSel.append('path.line').at({ d: line(data) });
+
+    let correctSelr = dragwRangeInfo.svg.append('g').attr('clip-path', 'url(#clip)');
+    this.setState({guessGraphData: correctSelr});
+
+    let userGraphDataSel = dragwRangeInfo.svg.append('path.your-line');
+    dragwRangeInfo.drawAxis();
+  }
+
   componentDidMount() {
     this.drawGraphInfo();
     axios.get('https://api.iextrading.com/1.0/ref-data/symbols').then(res => {
@@ -161,28 +222,23 @@ class Dragchart extends Component {
   }
 
   saveDebutValue = (debutValue) => {
+    const { user_id, selectedCompany } = this.state;
     let idToken = localStorage.getItem(
       "token"
     );
     let requestData = {
+      user_id: user_id,
+      company: selectedCompany,
       data: debutValue
     };
-    console.log(requestData)
     axios({
       method: "post",
       url:
-        "https://u2qgvn2qw7.execute-api.us-west-2.amazonaws.com/dev/getPredictionDev",
-      headers: { Authorization: idToken,
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "*",
-      "Access-Control-Allow-Credentials": true},
+        "https://4bi7twv6tk.execute-api.us-west-2.amazonaws.com/default/getPrediction",
       data: requestData
     })
     .then((res) => {
       alert("Your process has been successfully completed.!!!");
-      let averages = res.data;
-      localStorage.setItem('averages', JSON.stringify(averages.averages));
-      this.setState({seeAverageButtonState: false});
     })
     .catch((err) => {
       alert(err);
@@ -193,7 +249,6 @@ class Dragchart extends Component {
     if (this.state.debutData)
     if (Object.keys(this.state.debutData).length > 0) {
       this.saveDebutValue(this.state.debutData);
-    console.log(this.state.debutData);
     } else {
       this.setState({showErrorModal: true});
     }
@@ -212,12 +267,11 @@ class Dragchart extends Component {
     };
     axios
       .delete(
-        "https://30xqj3oo9d.execute-api.us-west-2.amazonaws.com/dev/deleteDBdev",
+        "https://c1cz2t7guf.execute-api.us-west-2.amazonaws.com/default/deleteDB",
         { headers }
       )
       .then(res => {
         let status = res.data;
-        console.log(status);
 
         if (status.status === "success") {
           alert("Successfully Deleted the DB contents......");
@@ -230,15 +284,20 @@ class Dragchart extends Component {
   }
 
   getAverage = () => {
-    let avrgs = [];
-    let averages = JSON.parse(localStorage.getItem('averages'));
-    Object.keys(averages).forEach( key => {
-      avrgs.push({
-        year: parseInt(key, 10),
-        closePrice: averages[key]
-      })
-    });
-    this.setState({averageData: avrgs, showAverageGraph: true});
+    const { selectedCompany } = this.state;
+    let requestData = {
+      company: selectedCompany
+    };
+    axios.get(
+      "https://gcfvlmkr59.execute-api.us-west-2.amazonaws.com/beta/getAverage",
+      {
+        params: requestData
+      }
+    )
+    .then((res) => {
+      this.setState({data: res.data.averageData});
+      this.drawGraphInfoAverage();
+    })
   }
 
 
@@ -266,6 +325,7 @@ class Dragchart extends Component {
   };
 
   handleSelectSymbol = (item) => {
+    this.setState({selectedCompany: item.value});
     axios.get(`https://api.iextrading.com/1.0/stock/${item.value}/chart/3m`).then(res => {
       this.setState({data: res.data.map(data => ({ date: data.date, closePrice: data.close }))});
       this.drawGraphInfo();
@@ -305,7 +365,7 @@ class Dragchart extends Component {
             {/*<p>Predict the Market</p>*/}
 
             <Button bsStyle='primary' className='submit-prediction' onClick={this.onSubmit}>Submit Prediction</Button>
-            <Button bsStyle='primary' className='see-average' disabled={seeAverageButtonState} onClick={this.getAverage}>See Average</Button>
+            <Button bsStyle='primary' className='see-average' onClick={this.getAverage}>See Average</Button>
             <Button bsStyle='danger' className='clear-db' onClick={this.deleteDb}>Delete All Data</Button>
             <div id="drag"></div>
           </div>
