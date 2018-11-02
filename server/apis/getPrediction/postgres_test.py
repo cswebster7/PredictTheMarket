@@ -19,8 +19,8 @@ def lambda_handler(event, context):
 
     cur = conn.cursor()
 
-    submission_date = datetime.datetime.now()
-    print ("---> submission date\n", submission_date, "\n")
+    submission_date_time = datetime.datetime.now()
+    print ("---> submission date\n", submission_date_time, "\n")
     
     company = event['company']
     ui = event['user_id']
@@ -34,7 +34,7 @@ def lambda_handler(event, context):
                 sum_numbers += x
             return sum_numbers
         
-        cur.execute("""INSERT INTO prediction (event, submission_date, company, user_id, recent) VALUES (%s::json, %s, %s, %s, %s);""", (json.dumps(data), submission_date, company, ui, 'True'))
+        cur.execute("""INSERT INTO prediction (event, submission_date_time, company, user_id, recent) VALUES (%s::json, %s, %s, %s, %s);""", (json.dumps(data), submission_date_time, company, ui, 'True'))
 
     conn.commit()
     conn.close()

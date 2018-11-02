@@ -13,7 +13,6 @@ class Dragchart extends Component {
     this.state = {
       debutData: {},
       showErrorModal: false,
-      user_id: localStorage.getItem("user_id"),
       averageData: [
       ],
       showButtonFlag: false,
@@ -153,24 +152,27 @@ class Dragchart extends Component {
 
   drawGraphInfoAverage = () => {
     let { data } = this.state;
+    let { averageData } = this.state;
 
     var parseTime = d3.timeParse("%Y-%m-%d");
-    data.forEach(function(d) {
+    averageData.forEach(function(d) {
         d.date = parseTime(d.date);
     });
-
     var today = new Date();
     let start_date;
-    let end_date;
+    let end_date_avg;
     if (data.length) {
       start_date = data[0].date;
-      end_date = data[data.length-1].date;
     }
     else {
       start_date = today.setMonth(today.getMonth()-3);
-      end_date = today.setMonth(today.getMonth()+6);
     }
-
+    if (averageData.length) {
+      end_date_avg = averageData[averageData.length-1].date;
+    }
+    else {
+      end_date_avg = today.setMonth(today.getMonth()+6);
+    }
     // let { averageData } = this.state;
     let ƒ = d3.f;
 
@@ -186,7 +188,7 @@ class Dragchart extends Component {
 
     dragwRangeInfo.svg.append('rect').at({ width: dragwRangeInfo.width, height: dragwRangeInfo.height, opacity: 0 });
 
-    dragwRangeInfo.x.domain([start_date, end_date]);
+    dragwRangeInfo.x.domain([start_date, end_date_avg]);
     if (data.length)
       dragwRangeInfo.y.domain([0, data[data.length - 1].closePrice * 2]);
     else
@@ -213,6 +215,7 @@ class Dragchart extends Component {
     let correctSel = dragwRangeInfo.svg.append('g').attr('clip-path', 'url(#clip)');
     correctSel.append('path.area').at({ d: area(data) });
     correctSel.append('path.line').at({ d: line(data) });
+    correctSel.append('path.line').style("stroke-dasharray", ("3, 3")).at({ d: line(averageData) });
 
     let correctSelr = dragwRangeInfo.svg.append('g').attr('clip-path', 'url(#clip)');
     this.setState({guessGraphData: correctSelr});
@@ -234,12 +237,12 @@ class Dragchart extends Component {
   }
 
   saveDebutValue = (debutValue) => {
-    const { user_id, selectedCompany } = this.state;
+    const { selectedCompany } = this.state;
     let idToken = localStorage.getItem(
       "token"
     );
     let requestData = {
-      user_id: user_id,
+      user_id: localStorage.getItem("user_id"),
       company: selectedCompany,
       data: debutValue
     };
@@ -307,7 +310,7 @@ class Dragchart extends Component {
       }
     )
     .then((res) => {
-      this.setState({data: res.data.averageData});
+      this.setState({averageData: res.data.averageData});
       this.drawGraphInfoAverage();
     })
   }
