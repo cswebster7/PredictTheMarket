@@ -334,7 +334,7 @@ class Dragchart extends Component {
   }
 
   render() {
-    const { seeAverageButtonState, averageData, symbols } = this.state;
+    const { seeAverageButtonState, averageData, symbols, selectedCompany } = this.state;
     return (
         <div className="mainWidget">
           {this.state.showErrorModal === true && (
@@ -350,6 +350,7 @@ class Dragchart extends Component {
             placeholder='Search...'
             optionRenderer={ this._renderOption }
             matchPos='start'
+            value={selectedCompany}
           />
 
           <div>
